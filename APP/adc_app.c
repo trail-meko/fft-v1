@@ -20,8 +20,6 @@ uint16_t ttf_adc_ch3_buf[ADC_SAMPLES];
 
 /* DMA半传输/全传输完成标志 */
 volatile uint8_t adc_flag = 0;
-static volatile uint8_t dma_startup_cnt = 0;
-static volatile uint8_t last_adc_flag = 0;
 
 
 /* 内部函数声明 */
@@ -60,8 +58,6 @@ void adc1_init(uint32_t sample_rate)
     DMA_Cmd(DMA2_Stream0, ENABLE);
 
 	adc_flag = 0;
-	dma_startup_cnt = 0;
-	last_adc_flag = 0;
 	p = NULL;
 	memset(g_adc_dma_buf, 0, sizeof(g_adc_dma_buf));
 	memset(lcd_adc_ch1_buf, 0, sizeof(lcd_adc_ch1_buf));
@@ -235,33 +231,15 @@ adc_signal_result_t ch1_result, ch2_result, ch3_result;
 void adc_proc(void)
 {
     uint16_t *q;
-    uint8_t current_flag;
-
-    /* Skip first 8 DMA IRQs (~200ms) for ADC/DMA stabilization */
-    if(dma_startup_cnt < 8)
-    {
-        dma_startup_cnt++;
-        return;
-    }
 
     __disable_irq();
-    current_flag = adc_flag;
-    if(current_flag == 0 || p == NULL)
+    if(adc_flag == 0 || p == NULL)
     {
-        __enable_irq();
-        return;
-    }
-
-    /* Skip if same frame as last time */
-    if(current_flag == last_adc_flag)
-    {
-        adc_flag = 0;
         __enable_irq();
         return;
     }
 
     q = (uint16_t *)p;
-    last_adc_flag = current_flag;
     adc_flag = 0;
     __enable_irq();
 
@@ -279,9 +257,7 @@ void adc_proc(void)
 	
 	lcd_printf(0, 0, RED, GRAY0, "F=%.1fHz       \rD=%.1f %%    ", ch2_result.freq, ch2_result.duty);
 	lcd_printf(0, 32, BLUE, GRAY0, "Vpp=%d        \rRMS=%.1f    ", ch2_result.vpp, ch2_result.rms);
-	//lcd_printf(0, 64, GREEN, GRAY0, "H1=%.1f   \rH3=          \rTHD=%.1f %%", ch2_result.h3, ch2_result.thd);
-	lcd_printf(0, 96, RED, GRAY0,
-           "  \rH3 = %.3f  \rH5 = %.3f \r",
-            ch2_result.h3, ch2_result.h5);
+	lcd_printf(0, 64, GREEN, GRAY0, "H1=%.1f   \rH3=          \rTHD=%.1f %%", ch2_result.h3, ch2_result.thd);
+
 }
 

@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include "adc_app.h"
 
-/* FFT计算静态缓冲区 */
-static float fft_in[ADC_SAMPLES];
-static float fft_out[ADC_SAMPLES];
-static float mag[ADC_SAMPLES/2];
+/* CFFT radix-2: 256 complex points = 512 float interleaved */
+#define CFFT_LEN     256
+#define CFFT_BUF     512
 
-/* FFT实例静态化，只初始化一次，避免反复创建导致内部状态残留 */
-static arm_rfft_fast_instance_f32 fft_s;
-static uint8_t fft_init_done = 0;
+static float cfft_buf[CFFT_BUF];
+static float mag[CFFT_LEN];
 
 /**
  * @brief 计算波形基本参数
@@ -73,11 +71,15 @@ void fft_calc_time_params(uint16_t *buf, uint16_t len, uint32_t sample_rate, uin
 }
 
 /**
- * @brief FFT谐波分析
+ * @brief FFT谐波分析（arm_cfft_radix2_f32）
  */
 void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_signal_result_t *result)
 {
-    /* DC信号保护：Vpp太小（<10 LSB），判定为无AC分量 */
+    arm_cfft_radix2_instance_f32 cfft;
+    uint16_t base_idx;
+    float max_mag;
+
+    /* DC信号保护 */
     if(result->vpp < 10)
     {
         result->h1 = 0.0f;
@@ -89,30 +91,31 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
 
     if(buf==NULL || result==NULL || len==0 || sample_rate==0) return;
 
-    for(uint16_t i=0; i<len; i++)
-        fft_in[i] = (float)buf[i] - result->avg;
-
-    /* FFT实例只初始化一次，避免反复init导致内部状态异常 */
-    if(!fft_init_done)
+    for(uint16_t i=0; i<CFFT_LEN && i<len; i++)
     {
-        if(arm_rfft_fast_init_f32(&fft_s, len) != ARM_MATH_SUCCESS) return;
-        fft_init_done = 1;
+        cfft_buf[2*i]     = (float)buf[i] - result->avg;
+        cfft_buf[2*i + 1] = 0.0f;
+    }
+    for(uint16_t i=len; i<CFFT_LEN; i++)
+    {
+        cfft_buf[2*i]     = 0.0f;
+        cfft_buf[2*i + 1] = 0.0f;
     }
 
-    arm_rfft_fast_f32(&fft_s, fft_in, fft_out, 0);
+    arm_cfft_radix2_init_f32(&cfft, CFFT_LEN, 0, 1);
+    arm_cfft_radix2_f32(&cfft, cfft_buf);
 
-    mag[0] = fabsf(fft_out[0]) / len;
-    for(uint16_t i=1; i<len/2; i++)
+    mag[0] = fabsf(cfft_buf[0]) / CFFT_LEN;
+    for(uint16_t i=1; i<CFFT_LEN/2; i++)
     {
-        float re = fft_out[2*i];
-        float im = fft_out[2*i+1];
-        mag[i] = 2.0f * sqrtf(re*re + im*im) / len;
+        float re = cfft_buf[2*i];
+        float im = cfft_buf[2*i+1];
+        mag[i] = 2.0f * sqrtf(re*re + im*im) / CFFT_LEN;
     }
 
-    /* 自动寻找基波（跳过DC bin） */
-    uint16_t base_idx = 0;
-    float max_mag = 0.0f;
-    for(uint16_t i=1; i<len/2; i++)
+    base_idx = 0;
+    max_mag = 0.0f;
+    for(uint16_t i=1; i<CFFT_LEN/2; i++)
     {
         if(mag[i] > max_mag)
         {
@@ -121,7 +124,6 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
         }
     }
 
-    /* 未找到有效基波（全噪声或DC），安全返回 */
     if(base_idx == 0 || max_mag < 1e-6f)
     {
         result->h1 = 0.0f;
@@ -132,8 +134,8 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
     }
 
     result->h1 = mag[base_idx];
-    result->h3 = ((3 * base_idx) < (len / 2)) ? mag[3 * base_idx] : 0.0f;
-    result->h5 = ((5 * base_idx) < (len / 2)) ? mag[5 * base_idx] : 0.0f;
+    result->h3 = ((3 * base_idx) < (CFFT_LEN/2)) ? mag[3 * base_idx] : 0.0f;
+    result->h5 = ((5 * base_idx) < (CFFT_LEN/2)) ? mag[5 * base_idx] : 0.0f;
 
     if(result->h1 < 1e-3f)
     {
