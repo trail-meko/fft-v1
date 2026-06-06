@@ -405,11 +405,6 @@
           <GroupName>APP</GroupName>
           <Files>
             <File>
-              <FileName>adc_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\APP\adc_app.c</FilePath>
-            </File>
-            <File>
               <FileName>mydefine.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\APP\mydefine.h</FilePath>
@@ -420,9 +415,24 @@
               <FilePath>..\APP\scheduler.c</FilePath>
             </File>
             <File>
+              <FileName>adc_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\adc_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>fft.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\fft.c</FilePath>
+            </File>
+            <File>
               <FileName>usart_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\APP\usart_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>key_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\key_app.c</FilePath>
             </File>
           </Files>
         </Group>

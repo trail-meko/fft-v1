@@ -600,3 +600,24 @@ void Test_Demo(void)	//液晶屏测试例程
 }
 
 
+/**
+ * @brief 类 printf 在 LCD 上显示文本
+ * @param x     起始 X 坐标
+ * @param y     起始 Y 坐标
+ * @param fc    前景色
+ * @param bc    背景色
+ * @param fmt   格式化字符串
+ * @param ...   可变参数
+ */
+void lcd_printf(u16 x, u16 y, u16 fc, u16 bc, const char *fmt, ...)
+{
+    char buf[128]; // 缓冲区，可根据需求调整
+    va_list args;
+
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+
+    Gui_DrawFont_GBK16(x, y, fc, bc, (u8 *)buf);
+}
+

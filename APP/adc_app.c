@@ -1,6 +1,7 @@
 #include "adc_app.h"
-#include "sys.h"
-#include "string.h"
+#include "GUI.h"
+#include "Lcd_Driver.h"
+#include "mydefine.h"
 
 /* DMA原始缓冲区：交织存放 ch1 ch2 ch3 */
 uint16_t g_adc_dma_buf[ADC_DMA_BUF_SIZE];
@@ -56,8 +57,19 @@ void adc1_init(uint32_t sample_rate)
     /* 启动DMA */
     DMA_Cmd(DMA2_Stream0, ENABLE);
 
+	adc_flag = 0;
+	p = NULL;
+	memset(g_adc_dma_buf, 0, sizeof(g_adc_dma_buf));
+	memset(lcd_adc_ch1_buf, 0, sizeof(lcd_adc_ch1_buf));
+	memset(lcd_adc_ch2_buf, 0, sizeof(lcd_adc_ch2_buf));
+	memset(lcd_adc_ch3_buf, 0, sizeof(lcd_adc_ch3_buf));
+	memset(ttf_adc_ch1_buf, 0, sizeof(ttf_adc_ch1_buf));
+	memset(ttf_adc_ch2_buf, 0, sizeof(ttf_adc_ch2_buf));
+	memset(ttf_adc_ch3_buf, 0, sizeof(ttf_adc_ch3_buf));
     /* 启动TIM3，开始触发ADC */
     TIM_Cmd(TIM3, ENABLE);
+	
+
 }
 
 /**
@@ -204,7 +216,7 @@ void DMA2_Stream0_IRQHandler(void)
 
 
 
-
+adc_signal_result_t ch1_result, ch2_result, ch3_result;
 
 /**
  * @brief ADC数据处理函数
@@ -216,25 +228,38 @@ void DMA2_Stream0_IRQHandler(void)
  * 3. 准备LCD和TTF工作缓存
  * 4. 调用lcd_proc() / ttf_proc()
  */
-void ttf_proc(void)//100
+void adc_proc(void)
 {
-	uint16_t *q;
-	uint8_t local_flag;
+    uint16_t *q;
 
-	__disable_irq();
-	local_flag = adc_flag;
-	q = (uint16_t *)p;
-	adc_flag = 0;
-	__enable_irq();
+    __disable_irq();
+    if(adc_flag == 0 || p == NULL)
+    {
+        __enable_irq();
+        return;
+    }
+
+    q = (uint16_t *)p;
+    adc_flag = 0;
+    __enable_irq();
+
+    for(uint16_t i = 0; i < ADC_SAMPLES; i++)
+    {
+        ttf_adc_ch1_buf[i] = *q++;
+        ttf_adc_ch2_buf[i] = *q++;
+        ttf_adc_ch3_buf[i] = *q++;
+    }
+
+    /* 后面做FFT或参数计算 */
+    fft_analyze_signal(ttf_adc_ch1_buf, ADC_SAMPLES, 20000, 2048, &ch1_result);
+    fft_analyze_signal(ttf_adc_ch2_buf, ADC_SAMPLES, 20000, 2048, &ch2_result);
+    fft_analyze_signal(ttf_adc_ch3_buf, ADC_SAMPLES, 20000, 2048, &ch3_result);
 	
-	for(uint16_t i = 0; i < ADC_SAMPLES; i++)
-	{
-		ttf_adc_ch1_buf[i] = *q++;
-		ttf_adc_ch2_buf[i] = *q++;
-		ttf_adc_ch3_buf[i] = *q++;
-	}
-
-	adc_flag = 0; // 处理完成，清零
+	lcd_printf(0, 0, RED, GRAY0, "F=%.1fHz       \rD=%.1f %%    ", ch2_result.freq, ch2_result.duty);
+	lcd_printf(0, 32, BLUE, GRAY0, "Vpp=%d        \rRMS=%.1f    ", ch2_result.vpp, ch2_result.rms);
+	//lcd_printf(0, 64, GREEN, GRAY0, "H1=%.1f   \rH3=          \rTHD=%.1f %%", ch2_result.h3, ch2_result.thd);
+	lcd_printf(0, 96, RED, GRAY0,
+           "  \rH3=%.3f  \rH5=%.3f \r",
+            ch2_result.h3, ch2_result.h5);
 }
-
 

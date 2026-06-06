@@ -1,66 +1,86 @@
 #include "key_app.h"
-#include "time.h"
-uint8_t key_down,key_val,key_up,key_old;
+
+uint8_t key_down, key_val, key_up, key_old;
 uint8_t oled_mode;
 
-
-//按键初始化函数
-void key_init() //IO初始化
-{ 
- 	GPIO_InitTypeDef GPIO_InitStructure;
- 
- 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOG|RCC_APB2Periph_GPIOC, ENABLE);//使能时钟
-
-	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8;//KEY0-KEY1
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; //设置成上拉输入
- 	GPIO_Init(GPIOG, &GPIO_InitStructure);//初始化GPIOG
-
-	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_7;//
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; //设置成上拉输入
- 	GPIO_Init(GPIOC, &GPIO_InitStructure);//初始化GPIOC
-}
-
-// 检查
-uint8_t check(uint16_t year, uint8_t month)
+/**
+ * @brief 按键初始化
+ * PE0 ~ PE4
+ * 上拉输入，按下为低电平
+ */
+void key_init(void)
 {
-    struct tm tm_info = {0};
-    
-    tm_info.tm_year = year - 1900;
-    tm_info.tm_mon  = month;     
-    tm_info.tm_mday = 0;          
-    
-    mktime(&tm_info);
-    
-    return tm_info.tm_mday;  
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    /* 使能GPIOE时钟 */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;      // 输入模式下其实无效，写上也可以
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;   // 输入模式下影响不大
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;        // 上拉
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
 }
 
-uint8_t key_read()
+/**
+ * @brief 读取当前按键值
+ * @return 0:无按键 1~5:对应按键
+ *
+ * 说明：
+ * 这里使用“低电平表示按下”
+ */
+uint8_t key_read(void)
 {
     uint8_t temp = 0;
-		if(GPIO_ReadInputDataBit(GPIOG, GPIO_Pin_5)==0)temp=1;
-		if(GPIO_ReadInputDataBit(GPIOG, GPIO_Pin_6)==0)temp=2;
-		if(GPIO_ReadInputDataBit(GPIOG, GPIO_Pin_8)==0)temp=3;
-		if(GPIO_ReadInputDataBit(GPIOG, GPIO_Pin_7)==0)temp=4;
-		if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7)==0)temp=5;		
+
+    if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == Bit_RESET) temp = 1;
+    if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == Bit_RESET) temp = 2;
+    if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) == Bit_RESET) temp = 3;
+    if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) == Bit_RESET) temp = 4;
+    if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == Bit_RESET) temp = 5;
+
     return temp;
-	
 }
 
-void key_proc()
+/**
+ * @brief 按键处理函数
+ * 建议每10ms调用一次
+ */
+void key_proc(void)
 {
-    key_val = key_read();
+    key_val  = key_read();
     key_down = key_val & (key_val ^ key_old);
-    key_up = ~key_val & (key_val ^ key_old);
-    key_old = key_val;		
-	
-		switch ( key_down )
-		{
-			case 1:
-						if(++oled_mode%3==0)oled_mode=0;
-			break;
-		}
+    key_up   = ~key_val & (key_val ^ key_old);
+    key_old  = key_val;
 
+    switch(key_down)
+    {
+        case 1:
+            oled_mode++;
+            if(oled_mode >= 3)
+                oled_mode = 0;
+            break;
+
+        case 2:
+            /* 这里写按键2按下后的处理 */
+            break;
+
+        case 3:
+            /* 这里写按键3按下后的处理 */
+            break;
+
+        case 4:
+            /* 这里写按键4按下后的处理 */
+            break;
+
+        case 5:
+            /* 这里写按键5按下后的处理 */
+            break;
+
+        default:
+            break;
+    }
 }
-
 
 

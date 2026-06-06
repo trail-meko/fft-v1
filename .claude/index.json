@@ -1,0 +1,296 @@
+{
+  "generated_at": "2026-06-06T19:03:14+08:00",
+  "project_name": "STM32F4_FFT_Spectrum_Analyzer",
+  "scan_summary": {
+    "total_files_estimated": 124,
+    "files_scanned": 34,
+    "coverage_percent": 85.3,
+    "truncated": false,
+    "truncation_reason": null,
+    "ignore_rules_used": [
+      "OBJ/",
+      "*.o",
+      "*.d",
+      "*.crf",
+      "*.axf",
+      "*.hex",
+      "*.bin",
+      "*.dep",
+      "*.lst",
+      "*.lnp",
+      "*.iex",
+      "*.htm",
+      "*.build_log.htm",
+      "*.map",
+      "*.sct",
+      "*.uvguix.*",
+      "*.uvoptx",
+      "JLinkSettings.ini",
+      "DebugConfig/",
+      "*.bak",
+      "*.tmp",
+      ".DS_Store",
+      "Thumbs.db",
+      ".vscode/",
+      ".idea/"
+    ],
+    "files_ignored_count": 0,
+    "top_ignored_dirs": [
+      "OBJ/ (output directory)"
+    ]
+  },
+  "modules": [
+    {
+      "name": "USER",
+      "path": "USER/",
+      "language": "C",
+      "role": "主程序入口与Keil工程",
+      "entry_file": "USER/main.c",
+      "interfaces": [
+        "main()",
+        "NMI_Handler",
+        "HardFault_Handler",
+        "SysTick_Handler"
+      ],
+      "key_paths": [
+        "USER/main.c",
+        "USER/stm32f4xx_it.c",
+        "USER/stm32f4xx_conf.h",
+        "USER/system_stm32f4xx.c",
+        "USER/DSP_FFT.uvprojx"
+      ],
+      "test_dir": null,
+      "config_files": [
+        "USER/DSP_FFT.uvprojx",
+        "USER/stm32f4xx_conf.h"
+      ],
+      "coverage": {
+        "files_in_module": 13,
+        "files_scanned": 5,
+        "gaps": [
+          "stm32f4xx.h (芯片头文件，未读取)",
+          "system_stm32f4xx.c (系统时钟初始化实现，未读取)",
+          "DebugConfig/*.dbgconf (调试配置，未读取)"
+        ]
+      }
+    },
+    {
+      "name": "APP",
+      "path": "APP/",
+      "language": "C",
+      "role": "应用层：ADC数据处理、按键状态机、调度器、OLED显示",
+      "entry_file": "APP/adc_app.c",
+      "interfaces": [
+        "adc1_init()",
+        "ttf_proc()",
+        "DMA2_Stream0_IRQHandler()",
+        "scheduler_init()",
+        "scheduler_run()",
+        "TIM2_IRQHandler()",
+        "key_proc()",
+        "oled_proc()"
+      ],
+      "key_paths": [
+        "APP/adc_app.c",
+        "APP/adc_app.h",
+        "APP/scheduler.c",
+        "APP/key_app.c",
+        "APP/mydefine.h"
+      ],
+      "test_dir": null,
+      "config_files": [
+        "APP/mydefine.h"
+      ],
+      "coverage": {
+        "files_in_module": 14,
+        "files_scanned": 14,
+        "gaps": [
+          "led.c/h 为空文件（冗余）",
+          "usart_app.c 全部注释（预留接口）",
+          "lcd_proc() 函数体未实现",
+          "scheduler_task[] 当前为空表"
+        ]
+      }
+    },
+    {
+      "name": "HARDWARE",
+      "path": "HARDWARE/",
+      "language": "C",
+      "role": "硬件驱动层：TFT LCD、按键、LED、定时器、环形缓冲区",
+      "entry_file": "HARDWARE/1.8TFT/Lcd_Driver.c",
+      "interfaces": [
+        "Lcd_Init()",
+        "Gui_DrawPoint()",
+        "Gui_DrawFont_GBK16()",
+        "KEY_Init()",
+        "KEY_Scan()",
+        "LED_Init()",
+        "TIM3_Int_Init()",
+        "rt_ringbuffer_put()",
+        "rt_ringbuffer_get()"
+      ],
+      "key_paths": [
+        "HARDWARE/1.8TFT/Lcd_Driver.c",
+        "HARDWARE/1.8TFT/GUI.c",
+        "HARDWARE/KEY/key.c",
+        "HARDWARE/LED/led.c",
+        "HARDWARE/TIMER/timer.c",
+        "HARDWARE/ringbuffer.c"
+      ],
+      "test_dir": null,
+      "config_files": [
+        "HARDWARE/1.8TFT/LCD_Config.h",
+        "HARDWARE/1.8TFT/Lcd_Driver.h"
+      ],
+      "coverage": {
+        "files_in_module": 14,
+        "files_scanned": 12,
+        "gaps": [
+          "Font.h (字库数据文件，未读取)",
+          "Picture.h (图片数据文件，未读取)",
+          "LCD_Config.h (LCD参数配置，未读取)",
+          "TIM3与adc_app.c/scheduler.c中的TIM3使用存在潜在冲突"
+        ]
+      }
+    },
+    {
+      "name": "SYSTEM",
+      "path": "SYSTEM/",
+      "language": "C",
+      "role": "系统服务层：SysTick延时、位带操作宏、USART1串口",
+      "entry_file": "SYSTEM/delay/delay.c",
+      "interfaces": [
+        "delay_init()",
+        "delay_us()",
+        "delay_ms()",
+        "PAout()/PAin() (位带宏)",
+        "uart_init()",
+        "printf() (重定向)"
+      ],
+      "key_paths": [
+        "SYSTEM/delay/delay.c",
+        "SYSTEM/sys/sys.h",
+        "SYSTEM/usart/usart.c"
+      ],
+      "test_dir": null,
+      "config_files": [
+        "SYSTEM/usart/usart.h (#define EN_USART1_RX, USART_REC_LEN)"
+      ],
+      "coverage": {
+        "files_in_module": 6,
+        "files_scanned": 6,
+        "gaps": []
+      }
+    },
+    {
+      "name": "FWLIB",
+      "path": "FWLIB/",
+      "language": "C",
+      "role": "STM32F4标准外设库（官方，不建议修改）",
+      "entry_file": null,
+      "interfaces": [
+        "(所有外设驱动API，通过stm32f4xx_*.h声明)"
+      ],
+      "key_paths": [
+        "FWLIB/inc/ (28个头文件)",
+        "FWLIB/src/ (32个源文件)"
+      ],
+      "test_dir": null,
+      "config_files": [
+        "USER/stm32f4xx_conf.h (控制哪些外设被包含)"
+      ],
+      "coverage": {
+        "files_in_module": 60,
+        "files_scanned": 0,
+        "gaps": [
+          "所有60个文件均为ST官方库，仅通过文件清单识别，未逐个读取内容"
+        ]
+      }
+    },
+    {
+      "name": "CORE",
+      "path": "CORE/",
+      "language": "C, Assembly",
+      "role": "Cortex-M4核心文件：启动文件、CMSIS核心头文件",
+      "entry_file": "CORE/startup_stm32f40_41xxx.s",
+      "interfaces": [
+        "Reset_Handler",
+        "中断向量表"
+      ],
+      "key_paths": [
+        "CORE/startup_stm32f40_41xxx.s",
+        "CORE/core_cm4.h"
+      ],
+      "test_dir": null,
+      "config_files": [],
+      "coverage": {
+        "files_in_module": 3,
+        "files_scanned": 1,
+        "gaps": [
+          "core_cm4.h (CMSIS标准头文件，未读取)",
+          "core_cm4_simd.h (SIMD内联函数，未读取)"
+        ]
+      }
+    },
+    {
+      "name": "DSP_LIB",
+      "path": "DSP_LIB/",
+      "language": "C, Library",
+      "role": "ARM CMSIS-DSP预编译库与头文件",
+      "entry_file": "DSP_LIB/arm_cortexM4lf_math.lib",
+      "interfaces": [
+        "arm_cfft_radix4_init_f32()",
+        "arm_cfft_radix4_f32()",
+        "arm_cmplx_mag_f32()",
+        "arm_sin_f32()",
+        "arm_cos_f32()"
+      ],
+      "key_paths": [
+        "DSP_LIB/arm_cortexM4lf_math.lib",
+        "DSP_LIB/Include/arm_math.h",
+        "DSP_LIB/Include/arm_common_tables.h"
+      ],
+      "test_dir": null,
+      "config_files": [],
+      "coverage": {
+        "files_in_module": 13,
+        "files_scanned": 0,
+        "gaps": [
+          "arm_math.h (CMSIS-DSP主头文件，未深入读取)",
+          "arm_cortexM4lf_math.lib (二进制库文件，无法读取)"
+        ]
+      }
+    }
+  ],
+  "coverage_gaps_priority": [
+    {
+      "priority": 1,
+      "gap": "adc_app.c 中 lcd_proc() 和 FFT显示通路未实现",
+      "suggestion": "补全ADC数据到LCD波形显示的完整链路"
+    },
+    {
+      "priority": 2,
+      "gap": "scheduler_task[] 为空，调度器未实际使用",
+      "suggestion": "将adc_proc、key_proc、oled_proc等周期性任务注册到调度器"
+    },
+    {
+      "priority": 3,
+      "gap": "usart_app.c 全部注释，USART DMA方案未启用",
+      "suggestion": "如需高吞吐串口通信，可启用DMA收发方案替代当前中断方式"
+    },
+    {
+      "priority": 4,
+      "gap": "APP/led.c/h 空文件冗余 + APP/key_app.c 与 HARDWARE/KEY/key.c 功能重叠",
+      "suggestion": "清理冗余文件，统一按键驱动入口"
+    },
+    {
+      "priority": 5,
+      "gap": "TIM3被多处重复初始化 (timer.c, adc_app.c, scheduler.c)",
+      "suggestion": "统一TIM3的使用约定，避免外设冲突"
+    }
+  ],
+  "next_scan_suggestions": [
+    "如需深度理解ADC采集链路，建议阅读 USER/system_stm32f4xx.c（时钟树配置）",
+    "如需扩展DSP功能，建议阅读 DSP_LIB/Include/arm_math.h 中的完整API列表"
+  ]
+}
