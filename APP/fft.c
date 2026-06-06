@@ -72,6 +72,16 @@ void fft_calc_time_params(uint16_t *buf, uint16_t len, uint32_t sample_rate, uin
  */
 void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_signal_result_t *result)
 {
+    /* DC guard: Vpp too small -> no AC component */
+    if(result->vpp < 10)
+    {
+        result->h1 = 0.0f;
+        result->h3 = 0.0f;
+        result->h5 = 0.0f;
+        result->thd = 0.0f;
+        return;
+    }
+
     if(buf==NULL || result==NULL || len==0 || sample_rate==0) return;
 
     for(uint16_t i=0; i<len; i++)
@@ -90,7 +100,7 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
         mag[i] = 2.0f * sqrtf(re*re + im*im) / len;
     }
 
-    /* 自动寻找基波 */
+    /* Auto-find fundamental (skip DC bin) */
     uint16_t base_idx = 0;
     float max_mag = 0.0f;
     for(uint16_t i=1; i<len/2; i++)
@@ -100,6 +110,16 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
             max_mag = mag[i];
             base_idx = i;
         }
+    }
+
+    /* No valid fundamental found -> safe return */
+    if(base_idx == 0 || max_mag < 1e-6f)
+    {
+        result->h1 = 0.0f;
+        result->h3 = 0.0f;
+        result->h5 = 0.0f;
+        result->thd = 0.0f;
+        return;
     }
 
     result->h1 = mag[base_idx];
@@ -116,9 +136,6 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
     }
 }
 
-/**
- * @brief 对一组波形数据进行完整分析
- */
 void fft_analyze_signal(uint16_t *buf, uint16_t len, uint32_t sample_rate, uint16_t threshold, adc_signal_result_t *result)
 {
     if(buf==NULL || result==NULL) return;
