@@ -20,7 +20,7 @@
 #include "adc_app.h"
 #include "scheduler.h"
 #include "fft.h"
-
+#include "ui.h"
 
 
 #endif

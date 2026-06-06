@@ -434,6 +434,16 @@
               <FileType>1</FileType>
               <FilePath>..\APP\key_app.c</FilePath>
             </File>
+            <File>
+              <FileName>ui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\ui.c</FilePath>
+            </File>
+            <File>
+              <FileName>ui.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\APP\ui.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

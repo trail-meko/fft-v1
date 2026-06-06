@@ -57,13 +57,11 @@ void key_proc(void)
     switch(key_down)
     {
         case 1:
-            oled_mode++;
-            if(oled_mode >= 3)
-                oled_mode = 0;
+            ui_select_next_channel();
             break;
 
         case 2:
-            /* 这里写按键2按下后的处理 */
+            ui_confirm_channel();
             break;
 
         case 3:

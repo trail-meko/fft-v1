@@ -41,6 +41,7 @@ int main(void)
  	
 	Lcd_Init();	 //1.8¥Á“∫æß∆¡--≥ı ºªØ≈‰÷√
 	Lcd_Clear(GRAY0);//«Â∆¡
+	ui_init();                 // UI ≥ı ºªØ£®œ‘ æ≥ı ºª≠√Ê£©
 	
 //	Gui_DrawFont_GBK16(0,16,RED,GRAY0," STM32F4xx ≤‚ ‘");
 //	Gui_DrawFont_GBK16(0,32,RED,GRAY0," DSP FFT TEST ");	

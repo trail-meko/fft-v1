@@ -1,13 +1,11 @@
 #include "adc_app.h"
-#include "GUI.h"
-#include "Lcd_Driver.h"
 #include "mydefine.h"
 
-/* DMAÔ­Ê¼»º³åÇø£º½»Ö¯´æ·Å ch1 ch2 ch3 */
+/* DMAÔ­Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¯ï¿½ï¿½ï¿?ch1 ch2 ch3 */
 uint16_t g_adc_dma_buf[ADC_DMA_BUF_SIZE];
 volatile uint16_t *p = NULL;
 
-/* ²ð·ÖºóµÄÈýÂ·Êý×é */
+/* ï¿½ï¿½Öºï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ */
 uint16_t lcd_adc_ch1_buf[ADC_SAMPLES];
 uint16_t lcd_adc_ch2_buf[ADC_SAMPLES];
 uint16_t lcd_adc_ch3_buf[ADC_SAMPLES];
@@ -15,14 +13,14 @@ uint16_t lcd_adc_ch3_buf[ADC_SAMPLES];
 uint16_t ttf_adc_ch1_buf[ADC_SAMPLES];
 uint16_t ttf_adc_ch2_buf[ADC_SAMPLES];
 uint16_t ttf_adc_ch3_buf[ADC_SAMPLES];	
-/* Ô¤Áô¸øÏÔÊ¾ºÍËã·¨µÄ»º´æ */
+/* Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ã·¨ï¿½Ä»ï¿½ï¿½ï¿½ */
 
 
-/* DMA°ë´«Êä/È«´«ÊäÍê³É±êÖ¾ */
+/* DMAï¿½ë´«ï¿½ï¿½/È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É±ï¿½Ö?*/
 volatile uint8_t adc_flag = 0;
 
 
-/* ÄÚ²¿º¯ÊýÉùÃ÷ */
+/* ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 static void adc_gpio_init(void);
 static void adc_dma_init(void);
 static void adc_core_init(void);
@@ -30,8 +28,8 @@ static void tim3_init(uint32_t sample_rate);
 
 
 /**
- * @brief ADC1²ÉÑùÏµÍ³³õÊ¼»¯
- * @param sample_rate Ã¿¸öÍ¨µÀ²ÉÑùÂÊ£¬µ¥Î»Hz
+ * @brief ADC1ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½Ê¼ï¿½ï¿½
+ * @param sample_rate Ã¿ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê£ï¿½ï¿½ï¿½Î»Hz
  */
 void adc1_init(uint32_t sample_rate)
 {
@@ -40,21 +38,21 @@ void adc1_init(uint32_t sample_rate)
     adc_core_init();
     tim3_init(sample_rate);
 
-    /* Ê¹ÄÜADC DMAÇëÇó */
+    /* Ê¹ï¿½ï¿½ADC DMAï¿½ï¿½ï¿½ï¿½ */
     ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
     ADC_DMACmd(ADC1, ENABLE);
 
-    /* Ê¹ÄÜADC */
+    /* Ê¹ï¿½ï¿½ADC */
     ADC_Cmd(ADC1, ENABLE);
 
-//    /* F407 ½¨Òé×öÒ»´ÎÐ£×¼/Æô¶¯µÈ´ý */
+//    /* F407 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ð£×¼/ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½ */
 //    ADC_ResetCalibration(ADC1);
 //    while (ADC_GetResetCalibrationStatus(ADC1));
 
 //    ADC_StartCalibration(ADC1);
 //    while (ADC_GetCalibrationStatus(ADC1));
 
-    /* Æô¶¯DMA */
+    /* ï¿½ï¿½ï¿½ï¿½DMA */
     DMA_Cmd(DMA2_Stream0, ENABLE);
 
 	adc_flag = 0;
@@ -66,14 +64,14 @@ void adc1_init(uint32_t sample_rate)
 	memset(ttf_adc_ch1_buf, 0, sizeof(ttf_adc_ch1_buf));
 	memset(ttf_adc_ch2_buf, 0, sizeof(ttf_adc_ch2_buf));
 	memset(ttf_adc_ch3_buf, 0, sizeof(ttf_adc_ch3_buf));
-    /* Æô¶¯TIM3£¬¿ªÊ¼´¥·¢ADC */
+    /* ï¿½ï¿½ï¿½ï¿½TIM3ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ADC */
     TIM_Cmd(TIM3, ENABLE);
 	
 
 }
 
 /**
- * @brief GPIO³õÊ¼»¯£ºPA3 PA4 PA5×÷ÎªÄ£ÄâÊäÈë
+ * @brief GPIOï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½PA3 PA4 PA5ï¿½ï¿½ÎªÄ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 static void adc_gpio_init(void)
 {
@@ -88,7 +86,7 @@ static void adc_gpio_init(void)
 }
 
 /**
- * @brief DMA2_Stream0³õÊ¼»¯£¬ÓÃÓÚADC1°áÔËÊý¾Ý
+ * @brief DMA2_Stream0ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ADC1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 static void adc_dma_init(void)
 {
@@ -117,7 +115,7 @@ static void adc_dma_init(void)
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_Init(DMA2_Stream0, &DMA_InitStructure);
 
-    /* ¿ªÆô°ë´«ÊäºÍÈ«´«ÊäÖÐ¶Ï */
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ë´«ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿?*/
     DMA_ITConfig(DMA2_Stream0, DMA_IT_HT, ENABLE);
     DMA_ITConfig(DMA2_Stream0, DMA_IT_TC, ENABLE);
 
@@ -129,7 +127,7 @@ static void adc_dma_init(void)
 }
 
 /**
- * @brief ADC1³õÊ¼»¯£º3Í¨µÀÉ¨Ãè£¬TIM3´¥·¢
+ * @brief ADC1ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½3Í¨ï¿½ï¿½É¨ï¿½è£¬TIM3ï¿½ï¿½ï¿½ï¿½
  */
 static void adc_core_init(void)
 {
@@ -153,18 +151,18 @@ static void adc_core_init(void)
     ADC_InitStructure.ADC_NbrOfConversion = ADC_CH_NUM;
     ADC_Init(ADC1, &ADC_InitStructure);
 
-    /* ÅäÖÃ3¸ö¹æÔòÍ¨µÀ£ºPA3/PA4/PA5 -> ADC_Channel_3/4/5 */
+    /* ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½PA3/PA4/PA5 -> ADC_Channel_3/4/5 */
     ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 1, ADC_SampleTime_84Cycles);
     ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 2, ADC_SampleTime_84Cycles);
     ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 3, ADC_SampleTime_84Cycles);
 }
 
 /**
- * @brief TIM3³õÊ¼»¯£¬ÓÃÓÚ°´¹Ì¶¨ÆµÂÊ´¥·¢ADC
- * @param sample_rate Ã¿¸öÍ¨µÀ²ÉÑùÂÊ
+ * @brief TIM3ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ï¿½Ì¶ï¿½Æµï¿½Ê´ï¿½ï¿½ï¿½ADC
+ * @param sample_rate Ã¿ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * ËµÃ÷£º
- * Ò»´ÎTIM´¥·¢»áÍê³É3¸öÍ¨µÀ×ª»»£¬Òò´ËÕâÀïµÄ´¥·¢ÆµÂÊ¾Í°´¡°Ã¿Í¨µÀ²ÉÑùÂÊ¡±ÅäÖÃ¼´¿É¡£
+ * Ëµï¿½ï¿½ï¿½ï¿½
+ * Ò»ï¿½ï¿½TIMï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?ï¿½ï¿½Í¨ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½Æµï¿½Ê¾Í°ï¿½ï¿½ï¿½Ã¿Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¡ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½É¡ï¿½
  */
 static void tim3_init(uint32_t sample_rate)
 {
@@ -175,7 +173,7 @@ static void tim3_init(uint32_t sample_rate)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-    /* ¼ÆÊýÆµÂÊ = 1MHz£¬ÔòÖÜÆÚ = 1000000 / sample_rate */
+    /* ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ = 1MHzï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ = 1000000 / sample_rate */
     period = (1000000 / sample_rate) - 1;
 
     TIM_TimeBaseStructure.TIM_Prescaler = prescaler;
@@ -185,13 +183,13 @@ static void tim3_init(uint32_t sample_rate)
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
 
-    /* Ñ¡Ôñ¸üÐÂÊÂ¼þ×÷ÎªTRGOÊä³ö */
+    /* Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ÎªTRGOï¿½ï¿½ï¿?*/
     TIM_SelectOutputTrigger(TIM3, TIM_TRGOSource_Update);
 }
 
 /**
- * @brief DMAÖÐ¶Ï·þÎñº¯Êý
- * @note ÖÐ¶ÏÀïÖ»ÖÃ±êÖ¾£¬²»×ö¸´ÔÓÔËËã
+ * @brief DMAï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @note ï¿½Ð¶ï¿½ï¿½ï¿½Ö»ï¿½Ã±ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 void DMA2_Stream0_IRQHandler(void)
 {
@@ -199,7 +197,7 @@ void DMA2_Stream0_IRQHandler(void)
     {
 
 		p= g_adc_dma_buf;
-        adc_flag = 1;   /* Ç°°ë»º³å¿É´¦Àí */
+        adc_flag = 1;   /* Ç°ï¿½ë»ºï¿½ï¿½É´ï¿½ï¿½ï¿?*/
 
         DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_HTIF0);
     }
@@ -208,7 +206,7 @@ void DMA2_Stream0_IRQHandler(void)
     {
 
 		p= g_adc_dma_buf+ ADC_CH_NUM * ADC_SAMPLES;;
-        adc_flag = 2;   /* ºó°ë»º³å¿É´¦Àí */
+        adc_flag = 2;   /* ï¿½ï¿½ë»ºï¿½ï¿½É´ï¿½ï¿½ï¿½ */
 
         DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0);
     }
@@ -219,14 +217,14 @@ void DMA2_Stream0_IRQHandler(void)
 adc_signal_result_t ch1_result, ch2_result, ch3_result;
 
 /**
- * @brief ADCÊý¾Ý´¦Àíº¯Êý
- * @note ÔÚÖ÷Ñ­»·»òµ÷¶ÈÆ÷ÖÐµ÷ÓÃ
+ * @brief ADCï¿½ï¿½ï¿½Ý´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @note ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿?
  *
- * ¹¤×÷ÄÚÈÝ£º
- * 1. ÅÐ¶ÏDMAÊÇÇ°°ëÖ¡»¹ÊÇºó°ëÖ¡×¼±¸ºÃÁË
- * 2. ²ð·ÖÈýÍ¨µÀÊý¾Ý
- * 3. ×¼±¸LCDºÍTTF¹¤×÷»º´æ
- * 4. µ÷ÓÃlcd_proc() / ttf_proc()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½
+ * 1. ï¿½Ð¶ï¿½DMAï¿½ï¿½Ç°ï¿½ï¿½Ö¡ï¿½ï¿½ï¿½Çºï¿½ï¿½Ö¡×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
+ * 2. ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
+ * 3. ×¼ï¿½ï¿½LCDï¿½ï¿½TTFï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * 4. ï¿½ï¿½ï¿½ï¿½lcd_proc() / ttf_proc()
  */
 void adc_proc(void)
 {
@@ -250,14 +248,9 @@ void adc_proc(void)
         ttf_adc_ch3_buf[i] = *q++;
     }
 
-    /* ºóÃæ×öFFT»ò²ÎÊý¼ÆËã */
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½FFTï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?*/
     fft_analyze_signal(ttf_adc_ch1_buf, ADC_SAMPLES, 20000, 2048, &ch1_result);
     fft_analyze_signal(ttf_adc_ch2_buf, ADC_SAMPLES, 20000, 2048, &ch2_result);
     fft_analyze_signal(ttf_adc_ch3_buf, ADC_SAMPLES, 20000, 2048, &ch3_result);
-	
-	lcd_printf(0, 0, RED, GRAY0, "F=%.1fHz       \rD=%.1f %%    ", ch2_result.freq, ch2_result.duty);
-	lcd_printf(0, 32, BLUE, GRAY0, "Vpp=%d        \rRMS=%.1f    ", ch2_result.vpp, ch2_result.rms);
-	lcd_printf(0, 64, GREEN, GRAY0, "H1=%.1f   \rH3= %.2f         \rTHD=%.1f %%",ch2_result.h1, ch2_result.h3, ch2_result.thd);
-
 }
 
