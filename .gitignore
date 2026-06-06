@@ -1,0 +1,37 @@
+# Keil MDK build outputs
+OBJ/
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.dep
+*.lst
+*.lnp
+*.iex
+*.htm
+*.build_log.htm
+*.map
+*.sct
+
+# Keil user-specific files
+*.uvguix.*
+*.uvoptx
+JLinkSettings.ini
+DebugConfig/
+
+# Precompiled libraries (keep if needed)
+# DSP_LIB/arm_cortexM4lf_math.lib
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Other
+*.bak
+*.tmp
