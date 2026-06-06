@@ -4,13 +4,16 @@
 
 | 日期 | 变更内容 | 来源 |
 |------|---------|------|
+| 2026-06-06 | v5.0: FFT API 修复 + 踩坑知识库 | 开发迭代 |
 | 2026-06-06 | 初始架构文档生成（全仓扫描，覆盖率约85%） | 架构师初始化 |
+
+> 📖 踩坑记录见 **[ERRORS.md](ERRORS.md)** — DSP 库兼容性、API 差异、编码问题等
 
 ## 项目愿景
 
-基于STM32F407 ARM Cortex-M4平台的FFT频谱分析仪表项目（电赛仪表题）。核心功能：通过ADC采集模拟信号(PA1)，利用CMSIS-DSP库进行1024点快速傅里叶变换(FFT)，将频谱结果在1.8寸TFT LCD上实时显示，同时通过串口(PA9/PA10, 115200)输出数据。按键K1触发单次FFT计算，LED D2指示系统运行状态。
+基于STM32F407 ARM Cortex-M4平台的FFT频谱分析仪表项目（电赛仪表题）。核心功能：ADC1三通道(PA3/PA4/PA5) 20kHz同步采样 → DMA2双缓冲 → 256点FFT谐波分析 → 1.8寸TFT LCD实时显示基波/3次/5次谐波幅值与THD，同时串口(115200)输出。
 
-**技术栈**: C语言裸机编程，Keil MDK5 IDE，ARM Compiler 5 (V5.06)，STM32F4标准外设库(STD Library)，CMSIS-DSP预编译库，无RTOS。
+**技术栈**: C语言裸机编程，Keil MDK5 IDE，ARM Compiler 5 (V5.06)，STM32F4标准外设库(STD Library V1.4.0)，CMSIS-DSP预编译库(arm_cortexM4lf_math.lib，旧版)，无RTOS。
 
 ## 架构总览
 
@@ -24,9 +27,9 @@
 层1: FWLIB/CORE/DSP_LIB — 平台抽象层（STM32F4标准库、CMSIS-Core、CMSIS-DSP）
 ```
 
-**控制流**: `main()` 初始化各模块后进入 `while(1)` 主循环，按键K1（PA0，WK_UP）事件驱动FFT计算，LED心跳闪烁指示系统存活。
+**控制流**: `main()` 初始化各模块 → `scheduler_init()` (TIM2 1ms时基) → `while(1)` 调用 `scheduler_run()` → 每50ms执行 `adc_proc()` 进行数据分拣+FFT+LCD刷新。
 
-**数据流**: 模拟信号(PA1) → ADC采集 → DMA双缓冲 → 应用层数据分拣 → FFT运算(arm_cfft_radix4_f32) → 取模(arm_cmplx_mag_f32) → 串口打印/TFT显示。
+**数据流**: 模拟信号(PA3/PA4/PA5) → ADC1三通道扫描(TIM3 TRGO触发, 20kHz) → DMA2_Stream0双缓冲循环 → `adc_proc()` 按通道分拣 → `fft_analyze_signal()` → `fft_calc_basic_params()` (Vpp/avg/RMS) → `fft_calc_time_params()` (freq/duty) → `fft_calc_harmonics()` (**arm_cfft_radix2_f32**, 256点复数FFT) → LCD显示 + 串口输出。
 
 ## 模块结构图
 
@@ -127,15 +130,15 @@ graph TD
 **当前状态**: 本项目无自动化测试框架和测试用例。作为电赛原型项目，采用"烧录-观察-验证"的手动测试方式。
 
 **验证方法**:
-1. **FFT功能验证**: 使用内置信号发生器（main.c中软合成的多频点混合信号：1x + 4x + 8x谐波 + DC偏置），通过串口输出FFT计算结果，对比预期频谱分布
-2. **LCD显示验证**: 通过TFT屏幕上的文字提示确认系统启动
-3. **时序验证**: TIM3定时器计数器测量FFT运算耗时，结果以毫秒显示在LCD和串口
-4. **LED验证**: D2以约100ms周期闪烁（主循环t%10==0），确认系统未卡死
+1. **FFT功能验证**: `fft_self_test()`（已移除，仅开发调试用）用软合成1kHz正弦波验证FFT输出
+2. **LCD显示验证**: TFT屏幕实时显示 ch2 (PA4) 的频率、占空比、Vpp、RMS、H3、H5
+3. **ADC验证**: 串口打印原始ADC min/max/Vpp，确认信号通路正常
+4. **LED验证**: D2(PA1)心跳闪烁
 
-**测试缺口**:
-- 无ADC外部信号源验证
-- 无单元测试
-- 无自动化CI
+**已知限制**:
+- ⚠️ **DSP库兼容性**: 预编译 `.lib` 为旧版，**禁止使用 `arm_rfft_fast_*` 系列 API**。使用 `arm_cfft_radix2_f32` 替代，详见 [ERRORS.md](ERRORS.md)
+- 无自动化测试框架
+- ADC输入未做前端信号调理（阻抗匹配、抗混叠滤波）
 
 ## 编码规范
 
@@ -151,6 +154,8 @@ graph TD
 
 1. **修改代码前**: 确认目标文件所属模块层级，底层库(FWLIB/CORE/DSP_LIB)不建议修改
 2. **新增功能**: 在APP/层添加应用逻辑，在HARDWARE/层添加驱动封装
-3. **FFT相关**: 参考`arm_math.h`中的CMSIS-DSP函数声明，使用`arm_cfft_radix4_f32`等API
-4. **避免**: 在FWLIB/中修改ST官方库文件，避免引入RTOS级依赖（当前为裸机架构）
-5. **编译工具链**: 注意ARM Compiler 5的特有语法（如`__asm`内联汇编），不同于GCC ARM
+3. **FFT相关**: ⚠️ 必须使用 `arm_cfft_radix2_f32` 或 `arm_cfft_radix4_f32`，**禁止** `arm_rfft_fast_f32`
+4. **避免**: 在FWLIB/中修改ST官方库文件，避免引入RTOS级依赖
+5. **编译工具链**: ARM Compiler 5 (V5.06)，GBK编码源码，不同于GCC ARM
+6. **提交规范**: 用户明确要求推送前再 git push，不要自动推送
+7. 📖 遇问题先查 [ERRORS.md](ERRORS.md)

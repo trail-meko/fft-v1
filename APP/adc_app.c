@@ -257,7 +257,7 @@ void adc_proc(void)
 	
 	lcd_printf(0, 0, RED, GRAY0, "F=%.1fHz       \rD=%.1f %%    ", ch2_result.freq, ch2_result.duty);
 	lcd_printf(0, 32, BLUE, GRAY0, "Vpp=%d        \rRMS=%.1f    ", ch2_result.vpp, ch2_result.rms);
-	lcd_printf(0, 64, GREEN, GRAY0, "H1=%.1f   \rH3=          \rTHD=%.1f %%", ch2_result.h3, ch2_result.thd);
+	lcd_printf(0, 64, GREEN, GRAY0, "H1=%.1f   \rH3= %.2f         \rTHD=%.1f %%",ch2_result.h1, ch2_result.h3, ch2_result.thd);
 
 }
 

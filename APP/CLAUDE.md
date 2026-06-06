@@ -2,7 +2,20 @@
 
 ## 模块职责
 
-应用层模块，介于主程序(`USER/`)和硬件驱动(`HARDWARE/`)之间。负责 ADC 数据采集的分拣处理、按键状态机管理、简易调度器、以及 OLED 显示刷新逻辑。
+应用层模块，介于主程序(`USER/`)和硬件驱动(`HARDWARE/`)之间。包含 ADC 数据采集分拣、FFT 谐波分析、按键状态机、简易调度器、OLED 显示刷新。
+
+## 文件清单
+
+| 文件 | 职责 |
+|------|------|
+| `adc_app.c/h` | ADC1+DMA2双缓冲三通道采样 (PA3/PA4/PA5, 20kHz, TIM3触发) |
+| `fft.c/h` | FFT谐波分析 — **arm_cfft_radix2_f32** (256点复数FFT)，输出 h1/h3/h5/THD |
+| `scheduler.c/h` | TIM2 1ms时基调度器，50ms周期调用 adc_proc() |
+| `key_app.c/h` | 按键应用层 (PG5-8, PC7) |
+| `oled_app.c/h` | OLED/LCD 刷新 |
+| `mydefine.h` | 聚合头文件 |
+
+> ⚠️ FFT 必须用 `arm_cfft_radix2_f32`，详见 [ERRORS.md](../ERRORS.md)
 
 ## 入口与启动
 
