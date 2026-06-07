@@ -86,6 +86,7 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
         result->h3 = 0.0f;
         result->h5 = 0.0f;
         result->thd = 0.0f;
+        result->phase = 0.0f;
         return;
     }
 
@@ -130,10 +131,19 @@ void fft_calc_harmonics(uint16_t *buf, uint16_t len, uint32_t sample_rate, adc_s
         result->h3 = 0.0f;
         result->h5 = 0.0f;
         result->thd = 0.0f;
+        result->phase = 0.0f;
         return;
     }
 
     result->h1 = mag[base_idx];
+
+    /* 提取基波相位 (radians) */
+    {
+        float re = cfft_buf[2 * base_idx];
+        float im = cfft_buf[2 * base_idx + 1];
+        result->phase = atan2f(im, re);
+    }
+
     result->h3 = ((3 * base_idx) < (CFFT_LEN/2)) ? mag[3 * base_idx] : 0.0f;
     result->h5 = ((5 * base_idx) < (CFFT_LEN/2)) ? mag[5 * base_idx] : 0.0f;
 

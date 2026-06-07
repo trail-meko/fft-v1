@@ -2,9 +2,7 @@
 #include "scheduler.h"
 #include "adc_app.h"
 
-// ȫ�ֱ��������ڴ洢��������
 uint8_t task_num;
-//����ʱ���
 volatile uint32_t uwTick;
 
 typedef struct {
@@ -13,20 +11,18 @@ typedef struct {
     uint32_t last_run;
 } task_t;
 
-// ��̬�������飬ÿ�����������������ִ�����ڣ����룩���ϴ�����ʱ�䣨���룩
 static task_t scheduler_task[] =
 {
-	{adc_proc, 50, 0},
-	{key_proc, 10, 0},
-	{ui_proc,  200, 0},
+    {adc_proc, 50, 0},
+    {key_proc, 10, 0},
+    {ui_proc,  500, 0},
 
 };
 
 
 void scheduler_init(void)
 {
-    // �������������Ԫ�ظ�������������洢�� task_num ��
-	TIM2_Init();
+    TIM2_Init();
     task_num = sizeof(scheduler_task) / sizeof(task_t);
 };
 
@@ -36,7 +32,6 @@ void scheduler_run(void)
     for (uint8_t i = 0; i < task_num; i++)
     {
         uint32_t now_time = uwTick;
-
 
         if ((now_time - scheduler_task[i].last_run) >= scheduler_task[i].rate_ms)
         {
@@ -72,15 +67,11 @@ void TIM2_Init(void)
 }
 
 
-
-
 void TIM2_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
     {
-        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  // ����жϱ�־
-		uwTick++;				
+        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+        uwTick++;
     }
 }
-
-

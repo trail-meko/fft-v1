@@ -13,7 +13,7 @@
 
 
 #include "adc_app.h"
-#include "dac.h"
+
 #include "key_app.h"
 #include "usart_app.h"
 #include "math.h" 
@@ -22,6 +22,8 @@
 #include "scheduler.h"
 #include "fft.h"
 #include "ui.h"
+#include "system_state.h"
+#include "pid_controller.h"
 
 
 #endif
