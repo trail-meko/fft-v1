@@ -10,12 +10,15 @@
 #include "arm_math.h"  
 #include "adc_app.h"
 #include "scheduler.h"
+#include "dac_app.h"
+#include "adc_app.h"
+#include "waveform_analyzer_app.h"
 //STM32F407开发板 
 //DSP FFT测试实验   -库函数版本
 
 
 
-#define FFT_LENGTH		1024 		//FFT长度，默认是1024点FFT
+//#define FFT_LENGTH		1024 		//FFT长度，默认是1024点FFT
 
 float fft_inputbuf[FFT_LENGTH*2];	//FFT输入数组
 float fft_outputbuf[FFT_LENGTH];	//FFT输出数组
@@ -35,7 +38,12 @@ int main(void)
 	delay_init(168);  //初始化延时函数
 	uart_init(115200);		//初始化串口波特率为115200
 	
-	adc1_init(20000);//20khz
+	adc1_init(20000);//adc初始化
+	dac_app_init(2000, 100);
+	
+	dac_app_set_zero_based(0);  // 1:零基准 0:中点基准
+	//dac_init();
+	//set_dac_val(0);
 	LED_Init();					//初始化LED
 	key_init();					//初始化按键
  	
@@ -52,14 +60,21 @@ int main(void)
 //	Gui_DrawFont_GBK16(0,64,RED,GRAY0," K1:Run FFT");//显示提示信息 
 		
 //	arm_cfft_radix4_init_f32(&scfft,FFT_LENGTH,0,1);//初始化scfft结构体，设定FFT相关参数
-	
+
 	scheduler_init();//启动调度器
  	while(1)
 	{
-		
+
+//	        dac_app_set_waveform(WAVEFORM_SINE);
+//        delay_ms(8000);
+
+//        dac_app_set_waveform(WAVEFORM_SQUARE);
+//        delay_ms(8000);
+
+//        dac_app_set_waveform(WAVEFORM_TRIANGLE);
+//        delay_ms(8000);	
 		
 	scheduler_run();	
-		
 		
 //		key=KEY_Scan(0);
 //		

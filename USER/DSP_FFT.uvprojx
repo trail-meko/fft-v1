@@ -444,6 +444,16 @@
               <FileType>5</FileType>
               <FilePath>..\APP\ui.h</FilePath>
             </File>
+            <File>
+              <FileName>waveform_analyzer_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\waveform_analyzer_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>dac_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\dac_app.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

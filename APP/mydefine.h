@@ -13,6 +13,7 @@
 
 
 #include "adc_app.h"
+#include "dac.h"
 #include "key_app.h"
 #include "usart_app.h"
 #include "math.h" 

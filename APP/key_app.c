@@ -54,8 +54,12 @@ void key_proc(void)
     key_up   = ~key_val & (key_val ^ key_old);
     key_old  = key_val;
 
-    switch(key_down)
+	if( key_down != 0)
+	{
+		
+		    switch(key_down)
     {
+		
         case 1:
             ui_select_next_channel();
             break;
@@ -79,6 +83,8 @@ void key_proc(void)
         default:
             break;
     }
+	}
+
 }
 
 
